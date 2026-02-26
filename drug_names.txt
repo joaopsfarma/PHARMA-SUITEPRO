@@ -1,0 +1,143 @@
+Acetilcisteína
+Aciclovir
+Ácido Ascórbico
+Ácido Tranexâmico
+Ácido Zoledrônico
+Adenosina
+Alprostadil
+Alteplase
+Amicacina
+Aminofilina
+Amiodarona
+Amoxicilina + Clavulanato
+Ampicilina
+Ampicilina + Sulbactam
+Anfotericina B
+Anfotericina B Complexo Lipídico
+Anfotericina B Lipossomal
+Atropina
+Azitromicina
+Aztreonam
+Basiliximab
+Benzilpenicilina Benzatina
+Benzilpenicilina Potássica
+Benzilpenicilina Procaína
+Bicarbonato de Sódio 8,4%
+Bromoprida
+Bupivacaína
+Cafeína
+Cefazolina
+Cefepime
+Ceftazidima
+Ceftazidima + Avibactam
+Ceftriaxona
+Cefuroxima
+Cetoprofeno
+Cianocobalamina
+Ciprofloxacino
+Cisatracúrio
+Claritromicina
+Clindamicina
+Clonidina
+Cloreto de Potássio 10%
+Cloreto de Sódio 20%
+Complexo Protrombínico
+Dantroleno
+Daptomicina
+Deslanosídeo
+Dexametasona
+Dexmedetomidina
+Diazepam
+Diclofenaco Sódico
+Difenidramina
+Dipirona
+Dobutamina
+Dopamina
+Efedrina
+Enoxaparina
+Epinefrina
+Eritropoetina Recombinante
+Ertapenem
+Escetamina
+Escopolamina
+Esmolol
+Etilefrina
+Etomidato
+Fenilefrina
+Fenitoína
+Fenobarbital
+Fentanil
+Fibrinogênio
+Filgrastina
+Fitomenadiona
+Fluconazol
+Flumazenil
+Folinato de Cálcio
+Fosfato de Potássio
+Furosemida
+Ganciclovir
+Gentamicina
+Glicerofosfato de Sódio
+Gliconato de Cálcio 10%
+Glicose 25% e 50%
+Haloperidol
+Haloperidol Decanoato
+Heparina Sódica
+Hidralazina
+Hidrocortisona
+Imunoglobulina Anti-Rho (D)
+Imunoglobulina Coelho Antimócito Humano
+Imunoglobulina Humana
+Insulina Humana NPH
+Insulina Humana Regular
+Levofloxacino
+Lidocaína
+Linezolida
+Meropenem
+Mesna
+Metilergometrina
+Metilprednisolona
+Metoclopramida
+Metoprolol
+Metronidazol
+Micafungina
+Midazolam
+Milrinona
+Morfina
+Naloxona
+  name: string;
+Neostigmina
+Nitroglicerina
+Nitroprussiato de Sódio
+Noradrenalina (Norepinefrina)
+Octreotida
+Olanzapina
+Omeprazol
+Ondansetrona
+Oxacilina
+Pancurônio
+Pantoprazol
+Petidina
+Piperacilina + Tazobactam
+Polivitamínico (Adulto)
+Prometazina
+Propofol
+Protamina
+Ranitidina
+Rocurônio
+Sacarato de Hidróxido de Ferro III
+Sulfametoxazol + Trimetoprima
+Sulfato de Magnésio 10% e 50%
+Suxametônio
+Teicoplanina
+Tenoxicam
+Terlipressina
+Thiopental
+Tigeciclina
+Tirofiban
+Tobramicina
+Tramadol
+Vancomicina
+Vasopressina
+Vecurônio
+Voriconazol
