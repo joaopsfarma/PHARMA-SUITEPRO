@@ -4,6 +4,15 @@ import { Send, X, MessageSquare, Minus, Maximize2, Bot, User, Sparkles } from 'l
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 
+declare global {
+  interface Window {
+    aistudio: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
+  }
+}
+
 const MASCOT_URL = "https://storage.googleapis.com/generativeai-downloads/images/venvansinho.png"; // Placeholder or direct use if possible. Since I have the image in the prompt, I'll use the provided image.
 
 export default function Chatbot() {
@@ -33,9 +42,25 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      // Check for API key selection if needed for pro models
+      // For simplicity and reliability, we'll try to use the available key
+      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      
+      if (!apiKey && window.aistudio) {
+        const hasKey = await window.aistudio.hasSelectedApiKey();
+        if (!hasKey) {
+          await window.aistudio.openSelectKey();
+          // After opening, we proceed. The key will be in process.env.API_KEY on next attempt
+          // or injected now.
+        }
+      }
+
+      const ai = new GoogleGenAI({ apiKey: apiKey || "" });
+      
+      // Using gemini-3-flash-preview for better reliability and speed in the preview environment
+      // It is still extremely capable for clinical calculations and reasoning.
       const chat = ai.chats.create({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-3-flash-preview",
         config: {
           systemInstruction: `Você é o "Venvansinho", um mascote amigável e especialista em farmácia clínica hospitalar e UTI. 
           Seu objetivo é auxiliar farmacêuticos e médicos com cálculos de infusão, diluições, ajustes de dose (como Vancomicina), e dúvidas sobre o Manual Farmacêutico.
@@ -45,16 +70,21 @@ export default function Chatbot() {
         },
       });
 
-      // We need to send the history to the chat
-      // For simplicity in this implementation, we'll just send the current message
-      // but in a real app we'd pass the history.
       const response = await chat.sendMessage({ message: userMessage });
       const modelText = response.text || "Desculpe, tive um problema ao processar sua solicitação.";
       
       setMessages(prev => [...prev, { role: 'model', text: modelText }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "Ops! Tive um erro de conexão. Pode tentar novamente?" }]);
+      
+      // If the error is about missing API key, prompt for it
+      if (error.message?.includes("API key") || error.message?.includes("not found")) {
+        if (window.aistudio) {
+          await window.aistudio.openSelectKey();
+        }
+      }
+      
+      setMessages(prev => [...prev, { role: 'model', text: "Ops! Tive um erro de conexão ou permissão. Por favor, verifique se a chave de API está configurada ou tente novamente em instantes." }]);
     } finally {
       setIsLoading(false);
     }

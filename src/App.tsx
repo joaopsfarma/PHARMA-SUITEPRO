@@ -86,7 +86,7 @@ export default function App() {
               className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 whitespace-nowrap ${activeView === 'manual' ? 'bg-white text-blue-600 shadow-md shadow-slate-200/50' : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'}`}
             >
               <FlaskConical size={14} />
-              Injetáveis
+              Manual
             </button>
           </nav>
 
