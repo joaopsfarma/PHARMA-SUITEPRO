@@ -8,6 +8,7 @@ import ICUScales from './components/ICUScales';
 import ProceduralSedation from './components/ProceduralSedation';
 import PediatricCalculator from './components/PediatricCalculator';
 import VancomycinProtocol from './components/VancomycinProtocol';
+import Chatbot from './components/Chatbot';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -97,9 +98,14 @@ export default function App() {
                 <span className="text-xs font-bold text-slate-700">Conectado</span>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors cursor-pointer">
+            <a 
+              href="https://github.com/joaopsfarma/PHARMA-SUITEPRO.git" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors cursor-pointer"
+            >
               <Github size={20} />
-            </div>
+            </a>
           </div>
         </div>
       </header>
@@ -173,6 +179,8 @@ export default function App() {
         </AnimatePresence>
       </main>
 
+      <Chatbot />
+
       {/* Footer */}
       <footer className="p-8 border-t border-slate-200 mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
@@ -183,7 +191,14 @@ export default function App() {
             <a href="#" className="text-slate-400 hover:text-blue-600 transition-colors text-xs font-bold">Documentação</a>
             <a href="#" className="text-slate-400 hover:text-blue-600 transition-colors text-xs font-bold">Suporte</a>
             <div className="w-px h-4 bg-slate-200" />
-            <Github className="w-4 h-4 text-slate-300 cursor-pointer hover:text-slate-900 transition-colors" />
+            <a 
+              href="https://github.com/joaopsfarma/PHARMA-SUITEPRO.git" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-slate-300 hover:text-slate-900 transition-colors"
+            >
+              <Github className="w-4 h-4" />
+            </a>
           </div>
         </div>
       </footer>
