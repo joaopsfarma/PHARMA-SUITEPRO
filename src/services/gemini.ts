@@ -29,8 +29,14 @@ Para cada intervenção ou ajuste proposto, descreva a **expectativa de melhora 
 Use Markdown para formatar a resposta de forma profissional, utilizando tabelas ou listas onde apropriado para facilitar a leitura rápida pelo médico ou enfermeiro.`;
 
 export async function analyzeClinicalData(rawData: string) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-  const ai = new GoogleGenAI({ apiKey: apiKey as string });
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  
+  if (!apiKey || apiKey === 'undefined') {
+    console.error("Gemini API Key is missing. Please set VITE_GEMINI_API_KEY in your environment.");
+    throw new Error("Chave de API não configurada. Verifique as configurações do ambiente.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: apiKey });
   
   try {
     const response = await ai.models.generateContent({
@@ -41,9 +47,22 @@ export async function analyzeClinicalData(rawData: string) {
       },
     });
 
-    return response.text || "Não foi possível gerar a análise.";
-  } catch (error) {
+    if (!response.text) {
+      throw new Error("Resposta vazia da IA.");
+    }
+
+    return response.text;
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
-    throw new Error("Erro ao conectar com o serviço de IA.");
+    
+    // Provide more specific error messages if possible
+    if (error.message?.includes("API_KEY_INVALID")) {
+      throw new Error("Chave de API inválida. Verifique sua chave no Google AI Studio.");
+    }
+    if (error.message?.includes("quota")) {
+      throw new Error("Limite de uso da IA atingido. Tente novamente mais tarde.");
+    }
+    
+    throw new Error("Erro ao conectar com o serviço de IA: " + (error.message || "Erro desconhecido"));
   }
 }

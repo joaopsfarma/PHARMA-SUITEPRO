@@ -11,6 +11,7 @@ export default function Calculator() {
   const [volume, setVolume] = useState(DRUGS[0].standardMl);
   const [inputDose, setInputDose] = useState(DRUGS[0].defaultDose);
   const [inputRate, setInputRate] = useState(10);
+  const [massUnit, setMassUnit] = useState<'MG' | 'MCG' | 'UI'>(DRUGS[0].isUnitUI ? 'UI' : (DRUGS[0].isUnitMcg ? 'MCG' : 'MG'));
   const [resultRate, setResultRate] = useState("0");
   const [resultDose, setResultDose] = useState(0);
   const [isOutOfRange, setIsOutOfRange] = useState(false);
@@ -20,11 +21,28 @@ export default function Calculator() {
     setMg(selectedDrug.standardMg);
     setVolume(selectedDrug.standardMl);
     setInputDose(selectedDrug.defaultDose);
+    setMassUnit(selectedDrug.isUnitUI ? 'UI' : (selectedDrug.isUnitMcg ? 'MCG' : 'MG'));
   }, [selectedDrug]);
 
   useEffect(() => {
     // Concentration calculation
-    let conc = (selectedDrug.isUnitUI || selectedDrug.isUnitMg) ? mg / volume : (mg * 1000) / volume;
+    // If massUnit is MCG, mg is already in mcg.
+    // If massUnit is MG, and drug unit is mcg/..., we need to multiply by 1000.
+    // If massUnit is MG, and drug unit is mg/..., we keep as is.
+    
+    let currentMassInTargetUnit = mg;
+    const targetIsMcg = selectedDrug.unit.includes('mcg');
+    const targetIsMg = selectedDrug.unit.includes('mg') || selectedDrug.unit.includes('mEq');
+    const targetIsUI = selectedDrug.unit.includes('U') && !selectedDrug.unit.includes('mcg');
+
+    if (massUnit === 'MG' && targetIsMcg) {
+      currentMassInTargetUnit = mg * 1000;
+    } else if (massUnit === 'MCG' && targetIsMg) {
+      currentMassInTargetUnit = mg / 1000;
+    }
+    // UI is usually consistent, no conversion for now unless specified
+    
+    let conc = currentMassInTargetUnit / volume;
     
     if (conc <= 0 || volume <= 0) return;
 
@@ -44,7 +62,7 @@ export default function Calculator() {
       
       setResultDose(Number(Number(calcDose).toFixed(4)));
     }
-  }, [weight, selectedDrug, mg, volume, inputDose, inputRate, activeTab]);
+  }, [weight, selectedDrug, mg, volume, inputDose, inputRate, activeTab, massUnit]);
 
   useEffect(() => {
     setIsOutOfRange(resultDose < selectedDrug.minDose || resultDose > selectedDrug.maxDose);
@@ -122,7 +140,16 @@ export default function Calculator() {
                 onChange={e => setMg(Number(e.target.value))} 
                 className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl focus:border-blue-500 focus:bg-white outline-none transition-all group-hover:border-slate-200" 
               />
-              <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-xs">{selectedDrug.isUnitUI ? 'UI' : 'MG'}</div>
+              <button 
+                onClick={() => {
+                  if (massUnit === 'MG') setMassUnit('MCG');
+                  else if (massUnit === 'MCG') setMassUnit('MG');
+                  // UI stays UI for now
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white border border-slate-200 px-2 py-1 rounded-lg text-blue-600 font-black text-[10px] hover:bg-blue-50 transition-colors shadow-sm"
+              >
+                {massUnit}
+              </button>
             </div>
           </div>
           <div className="space-y-3">
@@ -245,9 +272,9 @@ export default function Calculator() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-slate-400 font-medium">Concentração</span>
               <span className="text-sm font-mono font-bold text-blue-400">
-                {((mg * (selectedDrug.isUnitUI || selectedDrug.isUnitMg ? 1 : 1000)) / volume).toFixed(2)} 
+                {((mg * (massUnit === 'MG' && selectedDrug.unit.includes('mcg') ? 1000 : (massUnit === 'MCG' && (selectedDrug.unit.includes('mg') || selectedDrug.unit.includes('mEq')) ? 0.001 : 1))) / volume).toFixed(2)} 
                 <span className="text-[10px] text-slate-500 ml-1">
-                  {selectedDrug.isUnitUI ? 'UI/mL' : (selectedDrug.isUnitMg ? 'mg/mL' : 'mcg/mL')}
+                  {selectedDrug.unit.split('/')[0]} / mL
                 </span>
               </span>
             </div>

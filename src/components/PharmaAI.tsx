@@ -17,8 +17,8 @@ export default function PharmaAI() {
     try {
       const result = await analyzeClinicalData(rawData);
       setAiOutput(result);
-    } catch (e) {
-      setError("Falha na comunicação com a IA. Verifique sua conexão.");
+    } catch (e: any) {
+      setError(e.message || "Falha na comunicação com a IA. Verifique sua conexão.");
     } finally {
       setIsGenerating(false);
     }
