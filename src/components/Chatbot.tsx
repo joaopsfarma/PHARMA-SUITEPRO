@@ -23,6 +23,7 @@ export default function Chatbot() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showKeyButton, setShowKeyButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -42,23 +43,29 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      // Check for API key selection if needed for pro models
-      // For simplicity and reliability, we'll try to use the available key
-      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      setShowKeyButton(false);
       
+      // Try to get the API key from environment
+      // process.env.GEMINI_API_KEY is the standard for free models
+      // process.env.API_KEY is the standard for paid/selected models
+      let apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      
+      // If no key is found, and we are in AI Studio, try to prompt for it
       if (!apiKey && window.aistudio) {
         const hasKey = await window.aistudio.hasSelectedApiKey();
         if (!hasKey) {
           await window.aistudio.openSelectKey();
-          // After opening, we proceed. The key will be in process.env.API_KEY on next attempt
-          // or injected now.
+          // We wait a bit or just try to use process.env.API_KEY which might be injected
+          apiKey = process.env.API_KEY;
         }
       }
 
-      const ai = new GoogleGenAI({ apiKey: apiKey || "" });
+      if (!apiKey) {
+        throw new Error("API key not found. Please configure your Gemini API key.");
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       
-      // Using gemini-3-flash-preview for better reliability and speed in the preview environment
-      // It is still extremely capable for clinical calculations and reasoning.
       const chat = ai.chats.create({
         model: "gemini-3-flash-preview",
         config: {
@@ -77,16 +84,31 @@ export default function Chatbot() {
     } catch (error: any) {
       console.error("Chat Error:", error);
       
-      // If the error is about missing API key, prompt for it
-      if (error.message?.includes("API key") || error.message?.includes("not found")) {
-        if (window.aistudio) {
-          await window.aistudio.openSelectKey();
-        }
+      const isKeyError = error.message?.includes("API key") || 
+                         error.message?.includes("not found") || 
+                         error.message?.includes("403") ||
+                         error.message?.includes("401");
+
+      if (isKeyError) {
+        setShowKeyButton(true);
       }
       
-      setMessages(prev => [...prev, { role: 'model', text: "Ops! Tive um erro de conexão ou permissão. Por favor, verifique se a chave de API está configurada ou tente novamente em instantes." }]);
+      setMessages(prev => [...prev, { 
+        role: 'model', 
+        text: isKeyError 
+          ? "Ops! Parece que a chave de API do Gemini não está configurada corretamente ou não tem permissão. Clique no botão abaixo para configurar."
+          : "Ops! Tive um erro de conexão. Por favor, tente novamente em instantes." 
+      }]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOpenKeySelector = async () => {
+    if (window.aistudio) {
+      await window.aistudio.openSelectKey();
+      setMessages(prev => [...prev, { role: 'model', text: "Chave de API selecionada! Pode tentar enviar sua mensagem novamente agora." }]);
+      setShowKeyButton(false);
     }
   };
 
@@ -177,6 +199,15 @@ export default function Chatbot() {
                         <div className="prose prose-sm max-w-none prose-slate">
                           <ReactMarkdown>{msg.text}</ReactMarkdown>
                         </div>
+                        {msg.role === 'model' && showKeyButton && i === messages.length - 1 && (
+                          <button
+                            onClick={handleOpenKeySelector}
+                            className="mt-3 w-full py-2 bg-blue-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Sparkles size={12} />
+                            Configurar Chave de API
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   ))}
