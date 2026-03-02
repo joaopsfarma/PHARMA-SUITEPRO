@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
 import { Send, X, MessageSquare, Minus, Maximize2, Bot, User, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
@@ -45,40 +44,21 @@ export default function Chatbot() {
     try {
       setShowKeyButton(false);
       
-      // Try to get the API key from environment
-      // process.env.GEMINI_API_KEY is the standard for free models
-      // process.env.API_KEY is the standard for paid/selected models
-      let apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-      
-      // If no key is found, and we are in AI Studio, try to prompt for it
-      if (!apiKey && window.aistudio) {
-        const hasKey = await window.aistudio.hasSelectedApiKey();
-        if (!hasKey) {
-          await window.aistudio.openSelectKey();
-          // We wait a bit or just try to use process.env.API_KEY which might be injected
-          apiKey = process.env.API_KEY;
-        }
-      }
-
-      if (!apiKey) {
-        throw new Error("API key not found. Please configure your Gemini API key.");
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      
-      const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
-        config: {
-          systemInstruction: `Você é o "Venvansinho", um mascote amigável e especialista em farmácia clínica hospitalar e UTI. 
-          Seu objetivo é auxiliar farmacêuticos e médicos com cálculos de infusão, diluições, ajustes de dose (como Vancomicina), e dúvidas sobre o Manual Farmacêutico.
-          Seja sempre preciso, técnico mas com um tom encorajador e prestativo. 
-          Se for solicitado um cálculo, mostre o passo a passo de forma clara.
-          Lembre-se: você é um assistente, a decisão final é sempre do profissional de saúde.`,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ message: userMessage }),
       });
 
-      const response = await chat.sendMessage({ message: userMessage });
-      const modelText = response.text || "Desculpe, tive um problema ao processar sua solicitação.";
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to connect to AI server.");
+      }
+
+      const data = await response.json();
+      const modelText = data.text || "Desculpe, tive um problema ao processar sua solicitação.";
       
       setMessages(prev => [...prev, { role: 'model', text: modelText }]);
     } catch (error: any) {
@@ -96,8 +76,8 @@ export default function Chatbot() {
       setMessages(prev => [...prev, { 
         role: 'model', 
         text: isKeyError 
-          ? "Ops! Parece que a chave de API do Gemini não está configurada corretamente ou não tem permissão. Clique no botão abaixo para configurar."
-          : "Ops! Tive um erro de conexão. Por favor, tente novamente em instantes." 
+          ? "Ops! Parece que a chave de API do Gemini não está configurada corretamente no servidor. Clique no botão abaixo para configurar (apenas no ambiente de desenvolvimento)."
+          : "Ops! Tive um erro de conexão com o servidor. Por favor, tente novamente em instantes." 
       }]);
     } finally {
       setIsLoading(false);
